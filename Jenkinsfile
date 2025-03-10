@@ -8,6 +8,15 @@ pipeline {
             }
         }
 
+        stage('Clean Old Containers & Images') {
+            steps {
+                script {
+                    sh 'docker stop tourism-test || true && docker rm tourism-test || true'
+                    sh 'docker rmi tourism-website-test || true'
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t tourism-website-test .'
