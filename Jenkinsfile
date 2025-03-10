@@ -16,7 +16,7 @@ pipeline {
 
         stage('Run Docker Container') {
             steps {
-                sh 'docker run -d -p 4080:80 tourism-website-test'
+                sh 'docker run -d -p 4080:80 --name tourism-test tourism-website-test'
             }
         }
     }
