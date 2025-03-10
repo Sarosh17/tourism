@@ -1,14 +1,10 @@
-# Use an Nginx base image
-FROM nginx:latest
+FROM nginx:alpine
 
-# Remove the default Nginx page
-RUN rm -rf /usr/share/nginx/html/*
-
-# Copy the website files to Nginx HTML directory
-COPY . /usr/share/nginx/html
+# Copy website files to nginx serve directory
+COPY . /usr/share/nginx/html/
 
 # Expose port 80
 EXPOSE 80
 
-# Start Nginx
+# Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]

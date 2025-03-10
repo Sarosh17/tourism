@@ -1,32 +1,46 @@
 pipeline {
     agent any
-    
+
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                git branch: 'test', url: 'https://github.com/Sarosh17/tourism.git'
+                checkout scm
             }
         }
-
-        stage('Clean Old Containers & Images') {
+        
+        stage('Build Docker Image') {
             steps {
-                script {
-                    sh 'docker stop tourism-test || true && docker rm tourism-test || true'
-                    sh 'docker rmi tourism-website-test || true'
+                bat 'docker build -t tourism-website:test .'
+            }
+        }
+        
+        stage('Tag Docker Image') {
+            steps {
+                bat 'docker tag tourism-website:test sarosh17/tourism-website:test'
+            }
+        }
+        
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([string(credentialsId: 'docker-hub-credential', variable: 'DOCKER_PWD')]) {
+                    bat 'docker login -u sarosh17 -p %Sak@1234%'
+                    bat 'docker push sarosh17/tourism-website:test'
                 }
             }
         }
-
-        stage('Build Docker Image') {
+        
+        stage('Deploy Container') {
             steps {
-                sh 'docker build -t tourism-website-test .'
+                bat 'docker stop tourism-test-container || true'
+                bat 'docker rm tourism-test-container || true' 
+                bat 'docker run -d -p 8081:80 --name tourism-test-container sarosh17/tourism-website:test'
             }
         }
-
-        stage('Run Docker Container') {
-            steps {
-                sh 'docker run -d -p 4080:80 --name tourism-test tourism-website-test'
-            }
+    }
+    
+    post {
+        always {
+            bat 'docker logout'
         }
     }
 }
